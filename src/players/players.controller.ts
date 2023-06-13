@@ -13,23 +13,26 @@ import { CreatePlayerDto } from './dtos/create-player.dto';
 import { PlayersService } from './players.service';
 import { Player } from './interfaces/player.interface';
 import { PlayersValidationParamsPipe } from './pipes/players-validation-params.pipe';
+import { UpdatePlayerDto } from './dtos/update-player.dto';
 
 @Controller('api/v1/players')
 export class PlayersController {
   constructor(private readonly playersService: PlayersService) {}
 
   @Post()
-  async createPlayer(@Body() createPlayerDto: CreatePlayerDto) {
-    await this.playersService.createPlayer(createPlayerDto);
+  async createPlayer(
+    @Body() createPlayerDto: CreatePlayerDto,
+  ): Promise<Player> {
+    return await this.playersService.createPlayer(createPlayerDto);
   }
 
   @Put('/:_id')
   @UsePipes(ValidationPipe)
   async updatePlayer(
-    @Body() createPlayerDto: CreatePlayerDto,
+    @Body() updatePlayerDto: UpdatePlayerDto,
     @Param('_id', PlayersValidationParamsPipe) _id: string,
   ): Promise<void> {
-    await this.playersService.updatePlayer(_id, createPlayerDto);
+    await this.playersService.updatePlayer(_id, updatePlayerDto);
   }
 
   @Get()
