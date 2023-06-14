@@ -12,7 +12,7 @@ import {
 import { CreatePlayerDto } from './dtos/create-player.dto';
 import { PlayersService } from './players.service';
 import { Player } from './interfaces/player.interface';
-import { PlayersValidationParamsPipe } from './pipes/players-validation-params.pipe';
+import { ValidationParamsPipe } from '../common/pipes/validation-params.pipe';
 import { UpdatePlayerDto } from './dtos/update-player.dto';
 
 @Controller('api/v1/players')
@@ -30,7 +30,7 @@ export class PlayersController {
   @UsePipes(ValidationPipe)
   async updatePlayer(
     @Body() updatePlayerDto: UpdatePlayerDto,
-    @Param('_id', PlayersValidationParamsPipe) _id: string,
+    @Param('_id', ValidationParamsPipe) _id: string,
   ): Promise<void> {
     await this.playersService.updatePlayer(_id, updatePlayerDto);
   }
@@ -42,14 +42,14 @@ export class PlayersController {
 
   @Get('/:_id')
   async getPlayerById(
-    @Param('_id', PlayersValidationParamsPipe) _id: string,
+    @Param('_id', ValidationParamsPipe) _id: string,
   ): Promise<Player> {
     return await this.playersService.getPlayerById(_id);
   }
 
   @Delete('/:_id')
   async deletePlayers(
-    @Param('_id', PlayersValidationParamsPipe) _id: string,
+    @Param('_id', ValidationParamsPipe) _id: string,
   ): Promise<void> {
     this.playersService.deletePlayer(_id);
   }

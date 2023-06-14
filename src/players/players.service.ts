@@ -24,7 +24,6 @@ export class PlayersService {
 
   async getPlayerById(_id: string): Promise<Player> {
     const playerFound = await this.findOneByIndex('_id', _id);
-    console.log(playerFound);
     if (!playerFound) {
       throw new NotFoundException(`Player with id ${_id} not found`);
     }
@@ -49,14 +48,18 @@ export class PlayersService {
     _id: string,
     updatePlayerDto: UpdatePlayerDto,
   ): Promise<void> {
-    const playerFound = await this.findOneByIndex('_id', _id);
+    try {
+      const playerFound = await this.findOneByIndex('_id', _id);
 
-    if (!playerFound) {
-      throw new NotFoundException(`Player with id ${_id} not found`);
+      if (!playerFound) {
+        throw new NotFoundException(`Player with id ${_id} not found`);
+      }
+      await this.playerModel
+        .findOneAndUpdate({ _id }, { $set: updatePlayerDto })
+        .exec();
+    } catch (error) {
+      this.logger.error(error);
     }
-    await this.playerModel
-      .findOneAndUpdate({ _id }, { $set: updatePlayerDto })
-      .exec();
   }
 
   async deletePlayer(_id: string): Promise<any> {
