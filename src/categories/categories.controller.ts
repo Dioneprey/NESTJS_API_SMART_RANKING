@@ -46,6 +46,10 @@ export class CategoriesController {
     await this.categoriesService.updateCategory(category, updateCategoryDto);
   }
 
+  @Get('/players/:playerId')
+  async GetCategoryPlayer(@Param() _id: string): Promise<{ Category: string }> {
+    return await this.categoriesService.getCategoryPlayer(_id);
+  }
   @Post('/:category/players/:playerId')
   async setCategoryPlayer(@Param() params: string[]): Promise<void> {
     await this.categoriesService.setCategoryPlayer(params);
