@@ -3,7 +3,7 @@ import { ChallengeStatus } from '../interfaces/challenge-status.enum';
 
 export class ChallengeStatusValidationPipe implements PipeTransform {
   readonly allowedStatus = [
-    ChallengeStatus.ACCEPT,
+    ChallengeStatus.ACCEPTED,
     ChallengeStatus.DENIED,
     ChallengeStatus.CANCELED,
   ];

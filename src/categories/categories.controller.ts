@@ -47,7 +47,7 @@ export class CategoriesController {
   }
 
   @Get('/players/:playerId')
-  async GetCategoryPlayer(@Param() _id: string): Promise<{ Category: string }> {
+  async GetCategoryPlayer(@Param() _id: string): Promise<Category> {
     return await this.categoriesService.getCategoryPlayer(_id);
   }
   @Post('/:category/players/:playerId')

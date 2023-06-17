@@ -20,13 +20,15 @@ export class ChallengesService {
   constructor(
     @InjectModel('Challenge') private readonly challengeModel: Model<Challenge>,
     @InjectModel('Match') private readonly matchModel: Model<Match>,
-    private readonly categoriesService: CategoriesService,
     private readonly playersService: PlayersService,
+    private readonly categoriesService: CategoriesService,
   ) {}
 
   private readonly logger = new Logger(ChallengesService.name);
 
-  async createChallenge(createChallengeDto: CreateChallengerDto): Promise<any> {
+  async createChallenge(
+    createChallengeDto: CreateChallengerDto,
+  ): Promise<Challenge> {
     const players = await this.playersService.getAllPlayers();
 
     createChallengeDto.players.map((playeyDto) => {
@@ -35,7 +37,9 @@ export class ChallengesService {
       );
 
       if (playerFilter.length === 0) {
-        throw new BadRequestException(`Id ${playeyDto._id} does not exist`);
+        throw new BadRequestException(
+          `Player with id ${playeyDto._id} does not exist`,
+        );
       }
     });
 
@@ -43,7 +47,9 @@ export class ChallengesService {
       (player) => player._id === createChallengeDto.requester,
     );
 
-    this.logger.log(`requesterIsPlayerOfMatch: ${requesterIsPlayerOfMatch}`);
+    this.logger.log(
+      `requesterIsPlayerOfMatch: ${requesterIsPlayerOfMatch[0]._id}`,
+    );
 
     if (requesterIsPlayerOfMatch.length == 0) {
       throw new BadRequestException(`The requester must be a player of match`);
@@ -53,8 +59,14 @@ export class ChallengesService {
       createChallengeDto.requester,
     );
 
+    if (!playerCategory) {
+      throw new BadRequestException(
+        `The requester must be registered in a category`,
+      );
+    }
+
     const createdChallenge = new this.challengeModel(createChallengeDto);
-    createdChallenge.category = playerCategory.Category;
+    createdChallenge.category = playerCategory.category;
     createdChallenge.dateTimeRequest = new Date();
 
     createdChallenge.status = ChallengeStatus.PENDING;
@@ -94,6 +106,9 @@ export class ChallengesService {
       throw new NotFoundException(`Challenge ${_id} not found`);
     }
 
+    if (challengeFound.status == 'REALIZED') {
+      throw new BadRequestException(`Challenge ${_id} is over`);
+    }
     if (updateChallengeDto.status) {
       challengeFound.dateTimeResponse = new Date();
     }
@@ -115,10 +130,17 @@ export class ChallengesService {
       throw new BadRequestException(`Challenge ${_id} not found`);
     }
 
-    const playerFilter = challengeFound.players.filter(
-      (player) => player.id === setChallengeMatchDto.def,
-    );
+    if (challengeFound.status == 'REALIZED') {
+      throw new BadRequestException(`Challenge ${_id} is over`);
+    }
 
+    if (challengeFound.status == 'CANCELED') {
+      throw new BadRequestException(`Challenge ${_id} was canceled`);
+    }
+
+    const playerFilter = challengeFound.players.filter(
+      (player) => player._id == setChallengeMatchDto.def,
+    );
     this.logger.log(`challengeFound ${challengeFound}`);
     this.logger.log(`playerFilter ${playerFilter}`);
 

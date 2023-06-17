@@ -58,24 +58,20 @@ export class CategoriesService {
       .exec();
   }
 
-  async getCategoryPlayer(_id: any): Promise<{ Category: string }> {
-    const playerId = _id.playerId;
-    await this.playersService.getPlayerById(playerId);
+  async getCategoryPlayer(playerId: any): Promise<Category> {
+    const players = await this.playersService.getAllPlayers();
 
-    const isPlayerRegistered = await this.categoryModel
-      .find()
-      .where('players')
-      .in([playerId])
-      .exec();
+    const playerFilter = players.filter((player) => player._id == playerId);
 
-    if (isPlayerRegistered.length == 0) {
-      throw new BadRequestException(
-        `Player ${playerId} is not in any category`,
-      );
+    if (playerFilter.length == 0) {
+      throw new BadRequestException(`Player ${playerId} is not a player!`);
     }
 
-    const category = isPlayerRegistered[0]?.category;
-    return { Category: category };
+    return await this.categoryModel
+      .findOne()
+      .where('players')
+      .in(playerId)
+      .exec();
   }
 
   async setCategoryPlayer(params: string[]): Promise<void> {
